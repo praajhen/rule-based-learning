@@ -1,0 +1,32 @@
+# Data
+data/
+raw/
+*.edf
+*.bdf
+*.set
+*.fdt
+*.vhdr
+*.eeg
+
+# MATLAB
+*.mat
+*.fig
+*.asv
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.tif
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Large files
+*.zip
+*.tar
+*.gz
