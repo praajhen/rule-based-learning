@@ -37,6 +37,7 @@ caption = "Task:\n\nYou will see shapes and colors.\n\nThere is a rule that dete
 
 text { caption = "Take a break.\n\nPress 1 to continue."; } break_text;
 text { caption = "Finished.\n\nThank you!"; } end_text;
+text { caption = "Score"; } score_text;
 
 # ---------------- PICTURES ----------------
 
@@ -58,6 +59,7 @@ picture { text incorrect_text; x=0; y=0; } incorrect_pic;
 picture { text instruction_text; x=0; y=0; } instruction_pic;
 picture { text break_text; x=0; y=0; } break_pic;
 picture { text end_text; x=0; y=0; } end_pic;
+picture { text score_text; x=0; y=0; } score_pic;
 
 picture {} blank_pic;
 
@@ -125,6 +127,14 @@ trial {
     terminator_button = 1;
     picture break_pic;
 } break_trial;
+
+trial {
+    trial_duration = forever;
+    trial_type = specific_response;
+    terminator_button = 1;
+    picture score_pic;
+} score_trial;
+
 
 trial { trial_duration = 3000; picture end_pic; } end_trial;
 
@@ -271,6 +281,8 @@ end;
 sub run_block(int block_type, int n_trials)
 begin
 
+    int score = 0;
+
     block_event.set_port_code(block_type);
     block_trial.present();
 
@@ -326,7 +338,7 @@ begin
             resp = response_manager.last_response();
             stimulus_data last = stimulus_manager.last_stimulus_data();
             rt = last.reaction_time();
-wait_interval(10);
+            wait_interval(10);
 
             if block_type == 1 then
                 response_event.set_port_code(110 + resp);
@@ -338,7 +350,10 @@ wait_interval(10);
 
             response_trial.present();
 
-            if resp == correct_button then accuracy = 1; end;
+            if resp == correct_button then
+                accuracy = 1;
+                score = score + 1;
+            end;
 
         else
             resp = 0;
@@ -357,50 +372,58 @@ wait_interval(10);
             ";rt=" + string(rt)
         );
 
-       # ---------------- FEEDBACK ----------------
+        if block_type == 3 then
 
-if block_type == 3 then
-    # -------- HARD (probabilistic) --------
-    
-    int r = random(1,100);
+            int r = random(1,100);
 
-    if accuracy == 1 then
-        if r <= 80 then
-            correct_event.set_port_code(fb_correct);
-            correct_trial.present();
+            if accuracy == 1 then
+                if r <= 80 then
+                    correct_event.set_port_code(fb_correct);
+                    correct_trial.present();
+                else
+                    incorrect_event.set_port_code(fb_incorrect);
+                    incorrect_trial.present();
+                end;
+            else
+                if r <= 80 then
+                    incorrect_event.set_port_code(fb_incorrect);
+                    incorrect_trial.present();
+                else
+                    correct_event.set_port_code(fb_correct);
+                    correct_trial.present();
+                end;
+            end;
+
         else
-            incorrect_event.set_port_code(fb_incorrect);
-            incorrect_trial.present();
-        end;
-    else
-        if r <= 80 then
-            incorrect_event.set_port_code(fb_incorrect);
-            incorrect_trial.present();
-        else
-            correct_event.set_port_code(fb_correct);
-            correct_trial.present();
-        end;
-    end;
 
-else
-    # -------- EASY & MEDIUM (normal) --------
-    
-    if accuracy == 1 then
-        correct_event.set_port_code(fb_correct);
-        correct_trial.present();
-    else
-        incorrect_event.set_port_code(fb_incorrect);
-        incorrect_trial.present();
-    end;
+            if accuracy == 1 then
+                correct_event.set_port_code(fb_correct);
+                correct_trial.present();
+            else
+                incorrect_event.set_port_code(fb_incorrect);
+                incorrect_trial.present();
+            end;
 
-end;
+        end;
 
         wait_interval(random(600,900));
 
         t = t + 1;
     end;
-end;
 
+    double acc = (double(score) / double(n_trials)) * 100.0;
+
+    string msg = "Block finished\n\nScore: " + string(score) +
+                 " / " + string(n_trials) +
+                 "\nAccuracy: " + string(acc,1) + " %" +
+                 "\n\nPress 1 to continue";
+
+    score_text.set_caption(msg);
+    score_text.redraw();
+
+    score_trial.present();
+
+end;
 # ---------------- FLOW ----------------
 
 instruction_trial.present();
@@ -410,12 +433,12 @@ wait_interval(50);
 #break_trial.present();
 #wait_interval(50);
 
-run_block(1,90);
+run_block(1,135);
 break_trial.present();
 
-run_block(2,120);
+run_block(2,243);
 break_trial.present();
 
-run_block(3,120);
+run_block(3,243);
 
 end_trial.present();
