@@ -269,7 +269,7 @@ Optional:
 ---
 
 # Team
-Praghajieeth Raajhen Santhana Goplan
+Praghajieeth Raajhen Santhana Gopalan
 Postdoctoral Researcher
 University of Jyväskylä, Finland
 
@@ -277,16 +277,6 @@ Principal Investigators:
 Prof. Tiina Parviainen
 Prof. Raine Koskimaa
 
----
-
-# Future Work
-
-* Increase trial counts
-* Additional pilot measurements
-* Improve motivation using score feedback
-* Machine learning prediction
-* Physiology-specific learning analysis
-* Paper preparation
 
 ---
 
