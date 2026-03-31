@@ -37,6 +37,9 @@ caption = "Practice:\n\nYou will see shapes and colors.\n\nThere is a rule that 
 
 text { caption = "Finished.\n\nThank you!"; } end_text;
 
+# -------- SCORE TEXT (ADDED) --------
+text { caption = "Score"; } score_text;
+
 # ---------------- PICTURES ----------------
 
 picture { text fix_text; x=0; y=0; } fix_pic;
@@ -57,6 +60,9 @@ picture { text correct_text; x=0; y=0; } correct_pic;
 picture { text incorrect_text; x=0; y=0; } incorrect_pic;
 picture { text instruction_text; x=0; y=0; } instruction_pic;
 picture { text end_text; x=0; y=0; } end_pic;
+
+# -------- SCORE PICTURE (ADDED) --------
+picture { text score_text; x=0; y=0; } score_pic;
 
 picture {} blank_pic;
 
@@ -99,6 +105,14 @@ trial {
     picture instruction_pic;
 } instruction_trial;
 
+# -------- SCORE TRIAL (ADDED) --------
+trial {
+    trial_duration = forever;
+    trial_type = specific_response;
+    terminator_button = 1;
+    picture score_pic;
+} score_trial;
+
 trial { trial_duration = 3000; picture end_pic; } end_trial;
 
 begin_pcl;
@@ -124,6 +138,8 @@ end;
 
 sub run_practice(int n_trials)
 begin
+    int score = 0;
+
     loop int t = 1 until t > n_trials begin
 
         fixation_trial.present();
@@ -134,7 +150,6 @@ begin
         easy_rule(idx);
         stim_event.set_target_button(correct_button);
 
-       
         int resp_before = response_manager.response_count();
 
         stim_trial.present();
@@ -146,18 +161,28 @@ begin
         if resp_after > resp_before then
             resp = response_manager.last_response();
         end;
-        
 
         pre_feedback_gap.present();
 
         if resp == correct_button then
             correct_trial.present();
+            score = score + 1;
         else
             incorrect_trial.present();
         end;
 
         t = t + 1;
     end;
+
+    # -------- SHOW SCORE --------
+    string msg = "Practice finished\n\nScore: " + string(score) +
+                 " / " + string(n_trials) +
+                 "\n\nPress 1 to continue";
+
+    score_text.set_caption(msg);
+    score_text.redraw();
+
+    score_trial.present();
 end;
 
 # ---------------- FLOW ----------------
