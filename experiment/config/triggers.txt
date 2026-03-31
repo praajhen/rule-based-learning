@@ -1,0 +1,120 @@
+Rule-Based Learning Experiment — Trigger Codes
+Author: Praghajieeth Raajhen Santhana Gopalan
+University of Jyvaskyla, Finland
+
+---
+
+## BLOCK TRIGGERS
+
+1   = Easy block start
+2   = Medium block start
+3   = Difficult block start
+10  = Practice block start
+
+---
+
+## PRACTICE STIMULUS TRIGGERS
+
+11 = circle_red
+12 = circle_green
+13 = circle_blue
+14 = square_red
+15 = square_green
+16 = square_blue
+17 = triangle_red
+18 = triangle_green
+19 = triangle_blue
+
+---
+
+## PRACTICE RESPONSE TRIGGERS
+
+21 = response button 1
+22 = response button 2
+23 = response button 3
+
+---
+
+## PRACTICE FEEDBACK TRIGGERS
+
+30 = correct feedback
+31 = incorrect feedback
+
+---
+
+## EASY BLOCK STIMULUS TRIGGERS (100–109)
+
+101 = circle_red
+102 = circle_green
+103 = circle_blue
+104 = square_red
+105 = square_green
+106 = square_blue
+107 = triangle_red
+108 = triangle_green
+109 = triangle_blue
+
+EASY RESPONSES
+111 = button 1
+112 = button 2
+113 = button 3
+
+EASY FEEDBACK
+120 = correct
+121 = incorrect
+
+---
+
+## MEDIUM BLOCK STIMULUS TRIGGERS (130–139)
+
+131 = circle_red
+132 = circle_green
+133 = circle_blue
+134 = square_red
+135 = square_green
+136 = square_blue
+137 = triangle_red
+138 = triangle_green
+139 = triangle_blue
+
+MEDIUM RESPONSES
+141 = button 1
+142 = button 2
+143 = button 3
+
+MEDIUM FEEDBACK
+150 = correct
+151 = incorrect
+
+---
+
+## DIFFICULT BLOCK STIMULUS TRIGGERS (160–169)
+
+161 = circle_red
+162 = circle_green
+163 = circle_blue
+164 = square_red
+165 = square_green
+166 = square_blue
+167 = triangle_red
+168 = triangle_green
+169 = triangle_blue
+
+DIFFICULT RESPONSES
+171 = button 1
+172 = button 2
+173 = button 3
+
+DIFFICULT FEEDBACK
+180 = correct
+181 = incorrect
+
+---
+
+## TIMING
+
+Fixation: 750 ms
+Stimulus window: 1200 ms
+Feedback: 750 ms
+ITI: 600–900 ms jitter
+----------------------
