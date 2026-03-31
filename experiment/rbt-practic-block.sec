@@ -110,6 +110,8 @@ stimuli[7]=triangle_red_pic; stimuli[8]=triangle_green_pic; stimuli[9]=triangle_
 
 int correct_button;
 
+# ---------------- RULE ----------------
+
 sub easy_rule(int idx)
 begin
     if idx<=3 then correct_button=1;
@@ -117,6 +119,8 @@ begin
     else correct_button=3;
     end;
 end;
+
+# ---------------- PRACTICE ----------------
 
 sub run_practice(int n_trials)
 begin
@@ -128,12 +132,21 @@ begin
         stim_event.set_stimulus(stimuli[idx]);
 
         easy_rule(idx);
-
         stim_event.set_target_button(correct_button);
+
+       
+        int resp_before = response_manager.response_count();
 
         stim_trial.present();
 
-        int resp = response_manager.last_response();
+        int resp_after = response_manager.response_count();
+
+        int resp = 0;
+
+        if resp_after > resp_before then
+            resp = response_manager.last_response();
+        end;
+        
 
         pre_feedback_gap.present();
 
@@ -146,6 +159,8 @@ begin
         t = t + 1;
     end;
 end;
+
+# ---------------- FLOW ----------------
 
 instruction_trial.present();
 run_practice(20);
