@@ -1,0 +1,152 @@
+scenario = "rule-based learning";
+response_matching = simple_matching;
+active_buttons = 3;
+button_codes = 1,2,3;
+write_codes = true;
+
+default_background_color = 0,0,0;
+default_text_color = 255,255,255;
+default_font = "Arial";
+default_font_size = 30;
+
+begin;
+
+# ---------------- BITMAPS ----------------
+
+bitmap { filename = "circle_red.bmp"; } circle_red;
+bitmap { filename = "circle_green.bmp"; } circle_green;
+bitmap { filename = "circle_blue.bmp"; } circle_blue;
+
+bitmap { filename = "square_red.bmp"; } square_red;
+bitmap { filename = "square_green.bmp"; } square_green;
+bitmap { filename = "square_blue.bmp"; } square_blue;
+
+bitmap { filename = "triangle_red.bmp"; } triangle_red;
+bitmap { filename = "triangle_green.bmp"; } triangle_green;
+bitmap { filename = "triangle_blue.bmp"; } triangle_blue;
+
+# ---------------- TEXT ----------------
+
+text { caption = "+"; font_size = 40; } fix_text;
+text { caption = "Correct"; } correct_text;
+text { caption = "Incorrect"; } incorrect_text;
+
+text {
+caption = "Practice:\n\nYou will see shapes and colors.\n\nThere is a rule that determines the correct category.\nTry to discover the rule based on feedback.\n\nPress 1, 2, or 3 to respond.\n\nPress 1 to begin.";
+} instruction_text;
+
+text { caption = "Finished.\n\nThank you!"; } end_text;
+
+# ---------------- PICTURES ----------------
+
+picture { text fix_text; x=0; y=0; } fix_pic;
+
+picture { bitmap circle_red; x=0; y=0; } circle_red_pic;
+picture { bitmap circle_green; x=0; y=0; } circle_green_pic;
+picture { bitmap circle_blue; x=0; y=0; } circle_blue_pic;
+
+picture { bitmap square_red; x=0; y=0; } square_red_pic;
+picture { bitmap square_green; x=0; y=0; } square_green_pic;
+picture { bitmap square_blue; x=0; y=0; } square_blue_pic;
+
+picture { bitmap triangle_red; x=0; y=0; } triangle_red_pic;
+picture { bitmap triangle_green; x=0; y=0; } triangle_green_pic;
+picture { bitmap triangle_blue; x=0; y=0; } triangle_blue_pic;
+
+picture { text correct_text; x=0; y=0; } correct_pic;
+picture { text incorrect_text; x=0; y=0; } incorrect_pic;
+picture { text instruction_text; x=0; y=0; } instruction_pic;
+picture { text end_text; x=0; y=0; } end_pic;
+
+picture {} blank_pic;
+
+# ---------------- TRIALS ----------------
+
+trial { trial_duration = 1000; picture fix_pic; } fixation_trial;
+
+trial {
+    trial_duration = 3000;
+    trial_type = first_response;
+    stimulus_event {
+        picture circle_red_pic;
+        time = 0;
+        target_button = 1;
+    } stim_event;
+} stim_trial;
+
+trial { trial_duration = 250; picture blank_pic; } pre_feedback_gap;
+
+trial {
+    trial_duration = 750;
+    stimulus_event {
+        picture correct_pic;
+        time = 0;
+    } correct_event;
+} correct_trial;
+
+trial {
+    trial_duration = 750;
+    stimulus_event {
+        picture incorrect_pic;
+        time = 0;
+    } incorrect_event;
+} incorrect_trial;
+
+trial {
+    trial_duration = forever;
+    trial_type = specific_response;
+    terminator_button = 1;
+    picture instruction_pic;
+} instruction_trial;
+
+trial { trial_duration = 3000; picture end_pic; } end_trial;
+
+begin_pcl;
+
+array<picture> stimuli[9];
+stimuli[1]=circle_red_pic; stimuli[2]=circle_green_pic; stimuli[3]=circle_blue_pic;
+stimuli[4]=square_red_pic; stimuli[5]=square_green_pic; stimuli[6]=square_blue_pic;
+stimuli[7]=triangle_red_pic; stimuli[8]=triangle_green_pic; stimuli[9]=triangle_blue_pic;
+
+int correct_button;
+
+sub easy_rule(int idx)
+begin
+    if idx<=3 then correct_button=1;
+    elseif idx<=6 then correct_button=2;
+    else correct_button=3;
+    end;
+end;
+
+sub run_practice(int n_trials)
+begin
+    loop int t = 1 until t > n_trials begin
+
+        fixation_trial.present();
+
+        int idx = random(1,9);
+        stim_event.set_stimulus(stimuli[idx]);
+
+        easy_rule(idx);
+
+        stim_event.set_target_button(correct_button);
+
+        stim_trial.present();
+
+        int resp = response_manager.last_response();
+
+        pre_feedback_gap.present();
+
+        if resp == correct_button then
+            correct_trial.present();
+        else
+            incorrect_trial.present();
+        end;
+
+        t = t + 1;
+    end;
+end;
+
+instruction_trial.present();
+run_practice(20);
+end_trial.present();

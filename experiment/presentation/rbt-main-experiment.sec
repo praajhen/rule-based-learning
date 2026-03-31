@@ -1,0 +1,421 @@
+scenario = "rule-based learning";
+response_matching = simple_matching;
+active_buttons = 3;
+button_codes = 1,2,3;
+write_codes = true;
+
+default_background_color = 0,0,0;
+default_text_color = 255,255,255;
+default_font = "Arial";
+default_font_size = 30;
+
+begin;
+
+# ---------------- BITMAPS ----------------
+
+bitmap { filename = "circle_red.bmp"; } circle_red;
+bitmap { filename = "circle_green.bmp"; } circle_green;
+bitmap { filename = "circle_blue.bmp"; } circle_blue;
+
+bitmap { filename = "square_red.bmp"; } square_red;
+bitmap { filename = "square_green.bmp"; } square_green;
+bitmap { filename = "square_blue.bmp"; } square_blue;
+
+bitmap { filename = "triangle_red.bmp"; } triangle_red;
+bitmap { filename = "triangle_green.bmp"; } triangle_green;
+bitmap { filename = "triangle_blue.bmp"; } triangle_blue;
+
+# ---------------- TEXT ----------------
+
+text { caption = "+"; font_size = 40; } fix_text;
+text { caption = "Correct"; } correct_text;
+text { caption = "Incorrect"; } incorrect_text;
+
+text {
+caption = "Task:\n\nYou will see shapes and colors.\n\nThere is a rule that determines the correct category.\nTry to discover the rule based on feedback.\n\nPress 1, 2, or 3 to respond.\n\nPress 1 to begin.";
+} instruction_text;
+
+text { caption = "Take a break.\n\nPress 1 to continue."; } break_text;
+text { caption = "Finished.\n\nThank you!"; } end_text;
+
+# ---------------- PICTURES ----------------
+
+picture { text fix_text; x=0; y=0; } fix_pic;
+picture { bitmap circle_red; x=0; y=0; } circle_red_pic;
+picture { bitmap circle_green; x=0; y=0; } circle_green_pic;
+picture { bitmap circle_blue; x=0; y=0; } circle_blue_pic;
+
+picture { bitmap square_red; x=0; y=0; } square_red_pic;
+picture { bitmap square_green; x=0; y=0; } square_green_pic;
+picture { bitmap square_blue; x=0; y=0; } square_blue_pic;
+
+picture { bitmap triangle_red; x=0; y=0; } triangle_red_pic;
+picture { bitmap triangle_green; x=0; y=0; } triangle_green_pic;
+picture { bitmap triangle_blue; x=0; y=0; } triangle_blue_pic;
+
+picture { text correct_text; x=0; y=0; } correct_pic;
+picture { text incorrect_text; x=0; y=0; } incorrect_pic;
+picture { text instruction_text; x=0; y=0; } instruction_pic;
+picture { text break_text; x=0; y=0; } break_pic;
+picture { text end_text; x=0; y=0; } end_pic;
+
+picture {} blank_pic;
+
+# ---------------- TRIALS ----------------
+
+trial { trial_duration = 750; picture fix_pic; } fixation_trial;
+
+trial {
+    trial_duration = 1200;
+    trial_type = first_response;
+    stimulus_event {
+        picture circle_red_pic;
+        time = 0;
+        target_button = 1;
+    } stim_event;
+} stim_trial;
+
+trial { trial_duration = 300; picture blank_pic; } gap_trial;
+trial { trial_duration = 250; picture blank_pic; } pre_feedback_gap;
+
+trial {
+    trial_duration = 25;
+    stimulus_event {
+        picture blank_pic;
+        time = 0;
+    } block_event;
+} block_trial;
+
+trial {
+    trial_duration = 40;
+    stimulus_event {
+        picture blank_pic;
+        time = 0;
+    } response_event;
+} response_trial;
+
+trial {
+    trial_duration = 750;
+    stimulus_event {
+        picture correct_pic;
+        time = 0;
+        port_code = 11;
+    } correct_event;
+} correct_trial;
+
+trial {
+    trial_duration = 750;
+    stimulus_event {
+        picture incorrect_pic;
+        time = 0;
+        port_code = 21;
+    } incorrect_event;
+} incorrect_trial;
+
+trial {
+    trial_duration = forever;
+    trial_type = specific_response;
+    terminator_button = 1;
+    picture instruction_pic;
+} instruction_trial;
+
+trial {
+    trial_duration = forever;
+    trial_type = specific_response;
+    terminator_button = 1;
+    picture break_pic;
+} break_trial;
+
+trial { trial_duration = 3000; picture end_pic; } end_trial;
+
+begin_pcl;
+
+array<picture> stimuli[9];
+stimuli[1]=circle_red_pic; stimuli[2]=circle_green_pic; stimuli[3]=circle_blue_pic;
+stimuli[4]=square_red_pic; stimuli[5]=square_green_pic; stimuli[6]=square_blue_pic;
+stimuli[7]=triangle_red_pic; stimuli[8]=triangle_green_pic; stimuli[9]=triangle_blue_pic;
+
+int correct_button;
+
+# ---------------- BALANCED ORDER ----------------
+
+sub make_stim_order(array<int,1>& order, int n_trials)
+begin
+    int reps = n_trials / 9;
+    int extra = n_trials % 9;
+    
+    int c = 1;
+    
+    loop int r = 1 until r > reps begin
+        loop int s = 1 until s > 9 begin
+            order[c] = s;
+            c = c + 1;
+            s = s + 1;
+        end;
+        r = r + 1;
+    end;
+    
+    loop int s = 1 until s > extra begin
+        order[c] = s;
+        c = c + 1;
+        s = s + 1;
+    end;
+
+    order.shuffle();
+
+    loop int i = 2 until i > n_trials begin
+        if order[i] == order[i-1] then
+            loop int j = i+1 until j > n_trials begin
+                if order[j] != order[i] && order[j] != order[i-1] then
+                    int temp = order[i];
+                    order[i] = order[j];
+                    order[j] = temp;
+                    break;
+                end;
+                j = j + 1;
+            end;
+        end;
+        i = i + 1;
+    end;
+end;
+
+# ---------------- RULES ----------------
+
+sub easy_rule(int idx)
+begin
+    if idx<=3 then correct_button=1;
+    elseif idx<=6 then correct_button=2;
+    else correct_button=3;
+    end;
+end;
+
+sub medium_rule(int idx)
+begin
+    if idx == 1 then correct_button = 1;
+    elseif idx == 2 then correct_button = 2;
+    elseif idx == 3 then correct_button = 3;
+    elseif idx == 4 then correct_button = 2;
+    elseif idx == 5 then correct_button = 3;
+    elseif idx == 6 then correct_button = 1;
+    elseif idx == 7 then correct_button = 3;
+    elseif idx == 8 then correct_button = 1;
+    elseif idx == 9 then correct_button = 2;
+    end;
+end;
+
+sub difficult_rule(int idx)
+begin
+    int r=random(1,100);
+    if idx<=3 then
+        if r<=80 then correct_button=1; else correct_button=2; end;
+    elseif idx<=6 then
+        if r<=80 then correct_button=2; else correct_button=1; end;
+    else
+        if r<=80 then correct_button=3; else correct_button=2; end;
+    end;
+end;
+
+# ---------------- PRACTICE ----------------
+
+sub run_practice(int n_trials)
+begin
+    block_event.set_port_code(10);
+    block_trial.present();
+
+    array<int> stim_order[n_trials];
+    make_stim_order(stim_order, n_trials);
+
+    loop int t = 1 until t > n_trials begin
+
+        fixation_trial.present();
+
+        int idx = stim_order[t];
+        stim_event.set_stimulus(stimuli[idx]);
+
+        easy_rule(idx);
+
+        stim_event.set_target_button(correct_button);
+        stim_event.set_port_code(10 + idx);
+
+        int resp_before = response_manager.response_count();
+        stim_trial.present();
+        int resp_after = response_manager.response_count();
+
+        int accuracy = 0;
+
+        if resp_after > resp_before then
+            int resp = response_manager.last_response();
+wait_interval(10);
+            response_event.set_port_code(20 + resp);
+            response_trial.present();
+
+            if resp == correct_button then accuracy = 1; end;
+        end;
+
+        pre_feedback_gap.present();
+
+        if accuracy == 1 then
+            correct_event.set_port_code(30);
+            correct_trial.present();
+        else
+            incorrect_event.set_port_code(31);
+            incorrect_trial.present();
+        end;
+
+        t = t + 1;
+    end;
+end;
+
+# ---------------- MAIN BLOCK ----------------
+
+sub run_block(int block_type, int n_trials)
+begin
+
+    block_event.set_port_code(block_type);
+    block_trial.present();
+
+    array<int> stim_order[n_trials];
+    make_stim_order(stim_order, n_trials);
+
+    loop int t = 1 until t > n_trials begin
+
+        fixation_trial.present();
+
+        int idx = stim_order[t];
+        stim_event.set_stimulus(stimuli[idx]);
+
+        string block_name = "";
+        int trigger_base = 0;
+        int fb_correct = 0;
+        int fb_incorrect = 0;
+
+        if block_type == 1 then
+            easy_rule(idx);
+            block_name = "easy";
+            trigger_base = 100;
+            fb_correct = 120;
+            fb_incorrect = 121;
+
+        elseif block_type == 2 then
+            medium_rule(idx);
+            block_name = "medium";
+            trigger_base = 130;
+            fb_correct = 150;
+            fb_incorrect = 151;
+
+        else
+            difficult_rule(idx);
+            block_name = "difficult";
+            trigger_base = 160;
+            fb_correct = 180;
+            fb_incorrect = 181;
+        end;
+
+        stim_event.set_target_button(correct_button);
+        stim_event.set_port_code(trigger_base + idx);
+
+        int resp_before = response_manager.response_count();
+        stim_trial.present();
+        int resp_after = response_manager.response_count();
+
+        int resp = -1;
+        int accuracy = 0;
+        int rt = -1;
+
+        if resp_after > resp_before then
+            resp = response_manager.last_response();
+            stimulus_data last = stimulus_manager.last_stimulus_data();
+            rt = last.reaction_time();
+wait_interval(10);
+
+            if block_type == 1 then
+                response_event.set_port_code(110 + resp);
+            elseif block_type == 2 then
+                response_event.set_port_code(140 + resp);
+            else
+                response_event.set_port_code(170 + resp);
+            end;
+
+            response_trial.present();
+
+            if resp == correct_button then accuracy = 1; end;
+
+        else
+            resp = 0;
+            accuracy = 0;
+            rt = -1;
+        end;
+
+        pre_feedback_gap.present();
+
+        logfile.add_event_entry(
+            "RESP;block=" + block_name +
+            ";trial=" + string(t) +
+            ";stim=" + string(idx) +
+            ";resp=" + string(resp) +
+            ";acc=" + string(accuracy) +
+            ";rt=" + string(rt)
+        );
+
+       # ---------------- FEEDBACK ----------------
+
+if block_type == 3 then
+    # -------- HARD (probabilistic) --------
+    
+    int r = random(1,100);
+
+    if accuracy == 1 then
+        if r <= 80 then
+            correct_event.set_port_code(fb_correct);
+            correct_trial.present();
+        else
+            incorrect_event.set_port_code(fb_incorrect);
+            incorrect_trial.present();
+        end;
+    else
+        if r <= 80 then
+            incorrect_event.set_port_code(fb_incorrect);
+            incorrect_trial.present();
+        else
+            correct_event.set_port_code(fb_correct);
+            correct_trial.present();
+        end;
+    end;
+
+else
+    # -------- EASY & MEDIUM (normal) --------
+    
+    if accuracy == 1 then
+        correct_event.set_port_code(fb_correct);
+        correct_trial.present();
+    else
+        incorrect_event.set_port_code(fb_incorrect);
+        incorrect_trial.present();
+    end;
+
+end;
+
+        wait_interval(random(600,900));
+
+        t = t + 1;
+    end;
+end;
+
+# ---------------- FLOW ----------------
+
+instruction_trial.present();
+wait_interval(50);
+
+#run_practice(10);
+#break_trial.present();
+#wait_interval(50);
+
+run_block(1,90);
+break_trial.present();
+
+run_block(2,120);
+break_trial.present();
+
+run_block(3,120);
+
+end_trial.present();
