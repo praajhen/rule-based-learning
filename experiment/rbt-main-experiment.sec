@@ -411,11 +411,11 @@ begin
         t = t + 1;
     end;
 
-    double acc = (double(score) / double(n_trials)) * 100.0;
+   int acc = (score * 100) / n_trials;
 
     string msg = "Block finished\n\nScore: " + string(score) +
                  " / " + string(n_trials) +
-                 "\nAccuracy: " + string(acc,1) + " %" +
+                 "\nAccuracy: " + string(acc) + " %" +
                  "\n\nPress 1 to continue";
 
     score_text.set_caption(msg);
@@ -429,16 +429,28 @@ end;
 instruction_trial.present();
 wait_interval(50);
 
-#run_practice(10);
-#break_trial.present();
-#wait_interval(50);
 
-run_block(1,135);
-break_trial.present();
+array<int> block_order[3] = {1,2,3};
+block_order.shuffle();
 
-run_block(2,243);
-break_trial.present();
+loop int b = 1 until b > 3 begin
 
-run_block(3,243);
+    int block_type = block_order[b];
+
+    if block_type == 1 then
+        run_block(1,135);
+    elseif block_type == 2 then
+        run_block(2,243);
+    else
+        run_block(3,243);
+    end;
+
+    if b < 3 then
+        break_trial.present();
+    end;
+
+    b = b + 1;
+
+end;
 
 end_trial.present();
