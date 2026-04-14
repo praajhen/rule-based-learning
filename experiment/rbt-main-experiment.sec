@@ -201,16 +201,19 @@ end;
 
 sub medium_rule(int idx)
 begin
-    if idx == 1 then correct_button = 1;
-    elseif idx == 2 then correct_button = 2;
-    elseif idx == 3 then correct_button = 3;
-    elseif idx == 4 then correct_button = 2;
-    elseif idx == 5 then correct_button = 3;
-    elseif idx == 6 then correct_button = 1;
-    elseif idx == 7 then correct_button = 3;
-    elseif idx == 8 then correct_button = 1;
-    elseif idx == 9 then correct_button = 2;
+    # Base rule (shape)
+    if idx <= 3 then
+        correct_button = 1;   # circle
+    elseif idx <= 6 then
+        correct_button = 2;   # square
+    else
+        correct_button = 3;   # triangle
     end;
+
+    # Exceptions (3 stimuli)
+    if idx == 3 then correct_button = 2; end;   # circle_blue
+    if idx == 6 then correct_button = 3; end;   # square_blue
+    if idx == 9 then correct_button = 1; end;   # triangle_blue
 end;
 
 sub difficult_rule(int idx)
